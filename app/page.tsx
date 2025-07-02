@@ -2,14 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Popup,
-  useMapEvents,
-} from 'react-leaflet';
-import { Icon } from 'leaflet';
-import {
   Plus,
   MapPin,
   Search,
@@ -18,7 +10,6 @@ import {
   Utensils,
   Menu,
   X,
-  UserIcon,
 } from 'lucide-react';
 import {
   Dialog,
@@ -49,40 +40,46 @@ import {
 } from '@/hooks/use-restaurant';
 import ReactLoading from 'react-loading';
 import { format } from 'date-fns';
+import { toast } from '@/hooks/use-toast';
+import dynamic from 'next/dynamic';
 
-// Custom marker icon
-const restaurantIcon = new Icon({
-  // iconUrl:
-  //   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiMxMEI5ODEiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTMgMTJMMTMgMTJNMyAxMkwzIDRMMTMgNEwxMyAxMk0zIDEyTDMgMjBMMTMgMjBMMTMgMTJNMTMgMTJMMTMgMTYiIHN0cm9rZT0iI2ZmZmZmZiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPHBhdGggZD0iTTEzIDEyTDIxIDEyTTIxIDEyTDIxIDhMMTMgOE0yMSAxMkwyMSAxNkwxMyAxNiIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4KPC9zdmc+',
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/64/64113.png',
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-  popupAnchor: [0, -32],
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png',
-  shadowSize: [41, 41],
+const MapClient = dynamic(() => import('./map-client'), {
+  ssr: false,
 });
 
-const userIcon = new Icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/3177/3177440.png',
-  iconSize: [35, 35],
-  iconAnchor: [17, 35],
-  popupAnchor: [0, -30],
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png',
-  shadowSize: [41, 41],
-});
+// // Custom marker icon
+// const restaurantIcon = new Icon({
+//   // iconUrl:
+//   //   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiMxMEI5ODEiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTMgMTJMMTMgMTJNMyAxMkwzIDRMMTMgNEwxMyAxMk0zIDEyTDMgMjBMMTMgMjBMMTMgMTJNMTMgMTJMMTMgMTYiIHN0cm9rZT0iI2ZmZmZmZiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPHBhdGggZD0iTTEzIDEyTDIxIDEyTTIxIDEyTDIxIDhMMTMgOE0yMSAxMkwyMSAxNkwxMyAxNiIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4KPC9zdmc+',
+//   iconUrl: 'https://cdn-icons-png.flaticon.com/512/64/64113.png',
+//   iconSize: [32, 32],
+//   iconAnchor: [16, 32],
+//   popupAnchor: [0, -32],
+//   shadowUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png',
+//   shadowSize: [41, 41],
+// });
 
-function MapClickHandler({
-  onMapClick,
-}: {
-  onMapClick: (lat: number, lng: number) => void;
-}) {
-  useMapEvents({
-    click: (e) => {
-      onMapClick(e.latlng.lat, e.latlng.lng);
-    },
-  });
-  return null;
-}
+// const userIcon = new Icon({
+//   iconUrl: 'https://cdn-icons-png.flaticon.com/512/3177/3177440.png',
+//   iconSize: [35, 35],
+//   iconAnchor: [17, 35],
+//   popupAnchor: [0, -30],
+//   shadowUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png',
+//   shadowSize: [41, 41],
+// });
+
+// function MapClickHandler({
+//   onMapClick,
+// }: {
+//   onMapClick: (lat: number, lng: number) => void;
+// }) {
+//   useMapEvents({
+//     click: (e) => {
+//       onMapClick(e.latlng.lat, e.latlng.lng);
+//     },
+//   });
+//   return null;
+// }
 
 export default function Home() {
   const { restaurants, isLoading } = useRestaurants();
@@ -115,8 +112,6 @@ export default function Home() {
       },
     );
   }, []);
-
-  console.log(userLocation);
 
   const handleMapClick = (lat: number, lng: number) => {
     setSelectedPosition({ lat, lng });
@@ -181,6 +176,10 @@ export default function Home() {
 
         setIsAddModalOpen(false);
         setSelectedPosition(null);
+        toast({
+          title: 'Success',
+          description: response.message,
+        });
         reset();
       }
     },
@@ -315,7 +314,10 @@ export default function Home() {
                       <div className="flex items-center gap-1 text-xs text-slate-500">
                         <Clock className="w-3 h-3" />
                         <span>
-                          {format(restaurant?.created_at ?? '', 'dd/mm/yyyy')}
+                          {format(
+                            new Date(restaurant.created_at),
+                            'dd/MM/yyyy',
+                          )}
                         </span>
                       </div>
                     </div>
@@ -349,7 +351,7 @@ export default function Home() {
 
       {/* Map */}
       <div className="flex-1 relative">
-        <MapContainer
+        {/* <MapContainer
           center={userLocation ?? [40.7128, -74.006]}
           zoom={13}
           style={{ height: '100%', width: '100%' }}
@@ -362,7 +364,7 @@ export default function Home() {
           />
           <MapClickHandler onMapClick={handleMapClick} />
 
-          {/* User location marker */}
+          
           <Marker position={userLocation ?? [40.7128, -74.006]} icon={userIcon}>
             <Popup>
               <span>You are here</span>
@@ -400,7 +402,14 @@ export default function Home() {
               </Popup>
             </Marker>
           ))}
-        </MapContainer>
+        </MapContainer> */}
+        <MapClient
+          userLocation={userLocation ?? [40.7128, -74.006]}
+          restaurants={restaurants ?? []}
+          onMapClick={handleMapClick}
+          selectedRestaurant={selectedRestaurant}
+          setMap={setMap}
+        />
       </div>
 
       {/* Add Restaurant Modal */}
