@@ -97,6 +97,17 @@ export default function Home() {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(
     null,
   );
+  const [showDisclaimer, setShowDisclaimer] = useState(true);
+
+  useEffect(() => {
+    const disclaimerTimeout = setTimeout(() => {
+      setShowDisclaimer(false);
+    }, 3000);
+
+    return () => {
+      clearTimeout(disclaimerTimeout);
+    };
+  }, []);
 
   const queryClient = useQueryClient();
 
@@ -122,6 +133,7 @@ export default function Home() {
     setSelectedRestaurant(restaurant);
     if (map) {
       map.setView([restaurant.latitude, restaurant.longitude], 15);
+      setSidebarOpen(false);
     }
   };
 
@@ -213,7 +225,7 @@ export default function Home() {
       {/* Sidebar */}
       {/* Toggle Button — Mobile Only */}
       <button
-        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-emerald-500 rounded"
+        className="md:hidden fixed top-4 left-14 z-50 p-2 bg-emerald-500 rounded"
         onClick={() => setSidebarOpen(true)}
       >
         <Menu className="text-white w-5 h-5" />
@@ -263,7 +275,7 @@ export default function Home() {
         </div>
 
         {/* Restaurant List */}
-        <ScrollArea className="flex-1 p-4">
+        <ScrollArea className="flex-1 p-4 h-[calc(100vh-200px)]">
           <div className="space-y-3">
             {filteredRestaurants && filteredRestaurants?.length === 0 ? (
               <div className="text-center py-12">
@@ -339,15 +351,19 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-4 max-w-xs z-50">
-        <div className="flex items-center gap-2 mb-2">
-          <Plus className="w-5 h-5 text-emerald-500" />
-          <span className="font-medium">Add Restaurant</span>
+      {showDisclaimer && (
+        <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-4 max-w-[270px] md:max-w-xs z-50">
+          <div className="flex items-center gap-2 mb-2">
+            <Plus className="w-5 h-5 text-emerald-500" />
+            <span className="text-sm md:text-basefont-medium">
+              Add Restaurant
+            </span>
+          </div>
+          <p className="text-sm text-gray-600">
+            Click anywhere on the map to add a new restaurant
+          </p>
         </div>
-        <p className="text-sm text-gray-600">
-          Click anywhere on the map to add a new restaurant
-        </p>
-      </div>
+      )}
 
       {/* Map */}
       <div className="flex-1 relative">
@@ -414,7 +430,7 @@ export default function Home() {
 
       {/* Add Restaurant Modal */}
       <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="w-[90%] sm:max-w-[425px] mx-auto">
           <form onSubmit={handleSubmit(onSubmit)}>
             <DialogHeader>
               <DialogTitle>Add New Restaurant</DialogTitle>
