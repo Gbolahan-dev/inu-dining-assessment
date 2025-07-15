@@ -1,0 +1,24 @@
+# cloudbuild.yaml – simple, npm-only
+steps:
+  # 1️⃣ Install dependencies reproducibly
+  - name: node:20
+    id: deps
+    entrypoint: bash
+    args: ["-c", "npm ci"]        # uses package-lock.json
+
+  # 2️⃣ Build the static site
+  - name: node:20
+    id: build
+    entrypoint: bash
+    args: ["-c", "npm run build"]
+    env:
+      - NEXT_PUBLIC_API_URL=${_API_URL}
+
+  # 3️⃣ Sync the generated /out directory to the website bucket
+  - name: gcr.io/cloud-builders/gsutil
+    id: upload
+    args: ["-m", "rsync", "-r", "out", "gs://inu-dining-review"]
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
