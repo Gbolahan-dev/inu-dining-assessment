@@ -17,7 +17,7 @@ steps:
   # 3️⃣ Sync the generated /out directory to the website bucket
   - name: gcr.io/cloud-builders/gsutil
     id: upload
-    args: ["-m", "rsync", "-r", "out", "gs://inu-dining-review"]
+    args: ["-m", "rsync", "-r", "out", "gs://inu-dining-frontend"]
 
 options:
   logging: CLOUD_LOGGING_ONLY
